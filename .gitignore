@@ -4,4 +4,6 @@
 
 !*.kt
 !.gitignore
+!build/libs/CustomizedWorldGenerator.jar
+!README.md
 
