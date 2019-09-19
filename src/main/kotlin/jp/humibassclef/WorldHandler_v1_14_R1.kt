@@ -1,7 +1,6 @@
 package jp.humibassclef
 
 import jp.humibassclef.api.WorldHandler
-import jp.humibassclef.util.ChunkProviderSettings
 import net.minecraft.server.v1_14_R1.PlayerChunkMap
 import net.minecraft.server.v1_14_R1.World
 import net.minecraft.server.v1_14_R1.WorldProviderNormal

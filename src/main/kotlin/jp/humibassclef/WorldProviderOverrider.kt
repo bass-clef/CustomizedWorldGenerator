@@ -2,7 +2,7 @@ package jp.humibassclef
 
 import com.google.gson.*
 import com.google.gson.stream.JsonReader
-import jp.humibassclef.util.ChunkProviderSettings
+import jp.humibassclef.util.ChunkOverriderSettings
 import jp.humibassclef.util.OverriderSettingsOverworld
 import net.minecraft.server.v1_14_R1.*
 import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.StringUtils.abbreviateMiddle
@@ -99,11 +99,11 @@ class JsonUtils {
 
 class WorldProviderOverrider(world: World, dimensionmanager: DimensionManager) : WorldProviderNormal(world, dimensionmanager) {
     companion object {
-        class Factory(settingsDefault: ChunkProviderSettings = DEFAULT_SETTINGS) {
+        class Factory(settingsDefault: ChunkOverriderSettings = DEFAULT_SETTINGS) {
             companion object {
                 val JSON_ADAPTER = GsonBuilder().registerTypeAdapter(Factory::class.java, Serializer()).create()
                 val SETTINGS_FILE = "customized.json"
-                var DEFAULT_SETTINGS = ChunkProviderSettings()
+                var DEFAULT_SETTINGS = ChunkOverriderSettings()
 
                 init {
                     setDefaults()
@@ -127,11 +127,11 @@ class WorldProviderOverrider(world: World, dimensionmanager: DimensionManager) :
                     } catch(e: Exception) {
                         factory.saveSettings(getServerFileName())
                     }
-                    DEFAULT_SETTINGS = ChunkProviderSettings( factory.settings.map )
+                    DEFAULT_SETTINGS = ChunkOverriderSettings( factory.settings.map )
                 }
             }
 
-            var settings: ChunkProviderSettings = ChunkProviderSettings(settingsDefault.map)
+            var settings: ChunkOverriderSettings = ChunkOverriderSettings(settingsDefault.map)
             var isFromFile: Boolean = false
             init {
                 settings = DEFAULT_SETTINGS
@@ -151,7 +151,7 @@ class WorldProviderOverrider(world: World, dimensionmanager: DimensionManager) :
             private fun loadSettings(path: String) {
                 val json = Files.lines( Paths.get( path ), Charsets.UTF_8 )
                         .collect(Collectors.joining(System.getProperty("line.separator")))
-                settings = ChunkProviderSettings( jsonToFactory(json).settings.map )
+                settings = ChunkOverriderSettings( jsonToFactory(json).settings.map )
                 isFromFile = !isDefault()
             }
             private fun saveSettings(path: String) {
@@ -231,12 +231,13 @@ class WorldProviderOverrider(world: World, dimensionmanager: DimensionManager) :
         var factory = Factory(this.b.world.name)
 
         if (factory.isDefault() && !factory.isFromFile) {
-            val jsonOption = opt.get("legacy_custom_options").toString().replace("'", "")
-            factory = Factory.jsonToFactory( jsonOption ) ?: factory
-            factory.saveWorldSettings(this.b.world.name)
+            val customOption = opt.get("legacy_custom_options").toString().replace("'", "")
+            val factory_custom = Factory.jsonToFactory( customOption ) ?: factory
+            factory_custom.saveWorldSettings(this.b.world.name)
+            factory = if (factory_custom.isDefault()) factory else factory_custom
 
             CustomizedWorldGenerator.instance.logger.info("""[${this.b.world.name}] loaded (show only first).
-                [${jsonOption}]
+                legacy[${customOption}]
                 --- readed options >>>
                 [${factory}]""".trimIndent())
         } else {

@@ -3,9 +3,15 @@
 Customized World Generator
 ==========================
   
-
+  
 ## Description
-Minecraft のバージョン 1.8 から 1.12 まであった「カスタマイズワールド」を 1.14 でも使えるようにするためのサーバープラグイン  
+Minecraft のVersion 1.8 から 1.12 まであった「カスタマイズワールド」オプションを 1.14 でも使えるようにするための Server Plugin  
+  
+### World make/load 時に apply する customized option の order  
+0. DEFAULT\_SETTINGS
+1. spigot.jar の folder の customized.json (Server initialize に make)  
+2. ${world\_name}/customized.json (World create に make)  
+3. legacy\_custom\_options in WorldData  
   
 ## Usage
 ### Common

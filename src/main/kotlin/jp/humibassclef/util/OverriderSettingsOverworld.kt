@@ -4,8 +4,8 @@ import net.minecraft.server.v1_14_R1.Blocks
 import net.minecraft.server.v1_14_R1.GeneratorSettingsOverworld
 
 
-class OverriderSettingsOverworld(settings: ChunkProviderSettings) : GeneratorSettingsOverworld() {
-    var option: ChunkProviderSettings
+class OverriderSettingsOverworld(settings: ChunkOverriderSettings) : GeneratorSettingsOverworld() {
+    var option: ChunkOverriderSettings
 
     init {
         this.option = settings
