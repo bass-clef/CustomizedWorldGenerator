@@ -234,7 +234,7 @@ class WorldProviderOverrider(world: World, dimensionmanager: DimensionManager) :
             val customOption = opt.get("legacy_custom_options").toString().replace("'", "")
             val factory_custom = Factory.jsonToFactory( customOption ) ?: factory
             factory_custom.saveWorldSettings(this.b.world.name)
-            factory = if (factory_custom.isDefault()) factory else factory_custom
+            if (!factory_custom.isDefault()) factory = factory_custom
 
             CustomizedWorldGenerator.instance.logger.info("""[${this.b.world.name}] loaded (show only first).
                 legacy[${customOption}]
@@ -246,7 +246,7 @@ class WorldProviderOverrider(world: World, dimensionmanager: DimensionManager) :
 
         val overriderSettingsOverworld = OverriderSettingsOverworld( factory.settings )
         val biomelayout1 = BiomeLayout.c
-        val biomelayoutoverworldconfiguration = (biomelayout1.a() as BiomeLayoutOverworldConfiguration).a(this.b.getWorldData()).a(overriderSettingsOverworld)
+        val biomelayoutoverworldconfiguration = (biomelayout1.a() as BiomeLayoutOverworldConfiguration).a(this.b.worldData).a(overriderSettingsOverworld)
 
         return ChunkOverriderOverworld(this.b, biomelayout1.a(biomelayoutoverworldconfiguration), overriderSettingsOverworld)
     }
