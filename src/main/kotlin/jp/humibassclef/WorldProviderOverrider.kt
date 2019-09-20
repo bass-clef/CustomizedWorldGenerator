@@ -244,10 +244,9 @@ class WorldProviderOverrider(world: World, dimensionmanager: DimensionManager) :
             CustomizedWorldGenerator.instance.logger.info("readed settings from customized.json")
         }
 
-        val overriderSettingsOverworld = OverriderSettingsOverworld( factory.settings )
         val biomelayout1 = BiomeLayout.c
+        val overriderSettingsOverworld = OverriderSettingsOverworld( factory.settings )
         val biomelayoutoverworldconfiguration = (biomelayout1.a() as BiomeLayoutOverworldConfiguration).a(this.b.worldData).a(overriderSettingsOverworld)
-
         return ChunkOverriderOverworld(this.b, biomelayout1.a(biomelayoutoverworldconfiguration), overriderSettingsOverworld)
     }
 }
