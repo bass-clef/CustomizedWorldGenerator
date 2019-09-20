@@ -2,6 +2,7 @@
 *.*
 *
 
+!*.png
 !*.kt
 !.gitignore
 !build/libs/CustomizedWorldGenerator.jar
