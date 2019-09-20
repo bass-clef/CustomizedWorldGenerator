@@ -1,10 +1,7 @@
-<br>
-![image](sumnail.png)
-<br>
-<br>
 Customized World Generator
 ==========================
-<br>
+
+![image](https://github.com/bass-clef/CustomizedWorldGenerator/blob/images/sumnail.png)
 ## Description
 Minecraft のVersion 1.8 から 1.12 まであった「カスタマイズワールド」オプションを 1.14 でも使えるようにするための Server Plugin  
   
