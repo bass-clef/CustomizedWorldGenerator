@@ -118,6 +118,11 @@ data class ChunkOverriderSettings(
     /*@*/        "lapisSpread" to 16.0
     )
 ) {
+    companion object {
+        fun clone(settingsSource: ChunkOverriderSettings): ChunkOverriderSettings {
+            return ChunkOverriderSettings(settingsSource.map)
+        }
+    }
 
     var useCaves: Boolean by map
     var useIceburg: Boolean by map

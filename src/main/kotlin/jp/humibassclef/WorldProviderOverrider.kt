@@ -99,50 +99,53 @@ class JsonUtils {
 
 class WorldProviderOverrider(world: World, dimensionmanager: DimensionManager) : WorldProviderNormal(world, dimensionmanager) {
     companion object {
-        class Factory(settingsDefault: ChunkOverriderSettings = DEFAULT_SETTINGS) {
+        class Factory {
             companion object {
                 val JSON_ADAPTER = GsonBuilder().registerTypeAdapter(Factory::class.java, Serializer()).create()
                 val SETTINGS_FILE = "customized.json"
                 var DEFAULT_SETTINGS = ChunkOverriderSettings()
 
-                init {
-                    setDefaults()
-                    CustomizedWorldGenerator.instance.logger.info("initilized. make default customized.json")
-                }
+                fun init() = setDefaults()
                 fun jsonToFactory(source: String): Factory {
-                    if (source.isEmpty()) return Factory()
+                    if (source.isEmpty()) return Factory( DEFAULT_SETTINGS )
                     try {
                         return JsonUtils.gsonDeserialize(JSON_ADAPTER, source, Factory::class.java)
                     } catch(e: Exception) {
-                        return Factory()
+                        return Factory( DEFAULT_SETTINGS )
                     }
                 }
 
                 private fun getWorldFileName(worldName: String): String = "${CustomizedWorldGenerator.instance.dataFolder.path}/../../$worldName/$SETTINGS_FILE"
                 private fun getServerFileName(): String = "${CustomizedWorldGenerator.instance.dataFolder.path}/../../$SETTINGS_FILE"
                 private fun setDefaults() {
-                    val factory = Factory()
+                    val factory = Factory( DEFAULT_SETTINGS )
                     try {
                         factory.loadSettings(getServerFileName())
+                        CustomizedWorldGenerator.instance.logger.info("loaded default customized.json")
                     } catch(e: Exception) {
                         factory.saveSettings(getServerFileName())
+                        CustomizedWorldGenerator.instance.logger.info("first initialize. make default customized.json")
                     }
-                    DEFAULT_SETTINGS = ChunkOverriderSettings( factory.settings.map )
+                    DEFAULT_SETTINGS = factory.settings
                 }
             }
 
-            var settings: ChunkOverriderSettings = ChunkOverriderSettings(settingsDefault.map)
+            var settings: ChunkOverriderSettings = ChunkOverriderSettings.clone( DEFAULT_SETTINGS )
             var isFromFile: Boolean = false
-            init {
-                settings = DEFAULT_SETTINGS
+            constructor() {
+                setDefaults()
+                settings = ChunkOverriderSettings.clone( DEFAULT_SETTINGS )
                 isFromFile = false
             }
-            constructor(worldName: String): this() {
+            constructor(worldName: String) : this() {
                 try {
                     loadWorldSettings(worldName)
                 } catch(e: Exception) {
                     saveWorldSettings(worldName)
                 }
+            }
+            constructor(settingsDefault: ChunkOverriderSettings) {
+                settings = ChunkOverriderSettings.clone( settingsDefault )
             }
 
             fun loadWorldSettings(worldName: String) = loadSettings(getWorldFileName(worldName))
@@ -151,7 +154,7 @@ class WorldProviderOverrider(world: World, dimensionmanager: DimensionManager) :
             private fun loadSettings(path: String) {
                 val json = Files.lines( Paths.get( path ), Charsets.UTF_8 )
                         .collect(Collectors.joining(System.getProperty("line.separator")))
-                settings = ChunkOverriderSettings( jsonToFactory(json).settings.map )
+                settings = jsonToFactory(json).settings
                 isFromFile = !isDefault()
             }
             private fun saveSettings(path: String) {
@@ -192,10 +195,10 @@ class WorldProviderOverrider(world: World, dimensionmanager: DimensionManager) :
         class Serializer : JsonDeserializer<Factory>, JsonSerializer<Factory> {
             override fun deserialize(jsonElement: JsonElement, type: Type, context: JsonDeserializationContext): Factory {
                 val jsonObject: JsonObject = jsonElement.asJsonObject
-                val worldProviderOverrider_Factory = Factory()
+                val factory = Factory( ChunkOverriderSettings.clone( ChunkOverriderSettings() ) )
                 try {
-                    for(it in worldProviderOverrider_Factory.settings.map) {
-                        worldProviderOverrider_Factory.settings.map[it.key] = when(it.value) {
+                    for(it in factory.settings.map) {
+                        factory.settings.map[it.key] = when(it.value) {
                             is Boolean -> JsonUtils.getBoolean(jsonObject, it.key, it.value as Boolean)
                             is Double -> JsonUtils.getDouble(jsonObject, it.key, it.value as Double)
                             else -> { throw Exception("unknown parameter type ${it.key.javaClass}") }
@@ -204,9 +207,8 @@ class WorldProviderOverrider(world: World, dimensionmanager: DimensionManager) :
                 } catch(e: Exception) {
                     CustomizedWorldGenerator.instance.logger.info("exception inner is null. $e")
                 }
-                return Factory(worldProviderOverrider_Factory.settings)
+                return factory
             }
-
             override fun serialize(factory: Factory, type: Type?, context: JsonSerializationContext?): JsonElement {
                 val jsonObject = JsonObject()
                 for (it in factory.settings.map) {
@@ -229,19 +231,20 @@ class WorldProviderOverrider(world: World, dimensionmanager: DimensionManager) :
 
         val opt = this.b.getWorldData().a( NBTTagCompound() )
         var factory = Factory(this.b.world.name)
-
-        if (factory.isDefault() && !factory.isFromFile) {
+        if (factory.isFromFile) {
+            CustomizedWorldGenerator.instance.logger.info("readed settings from customized.json")
+        } else {
             val customOption = opt.get("legacy_custom_options").toString().replace("'", "")
-            val factory_custom = Factory.jsonToFactory( customOption ) ?: factory
-            factory_custom.saveWorldSettings(this.b.world.name)
-            if (!factory_custom.isDefault()) factory = factory_custom
+            if (!customOption.isEmpty()) {
+                val factory_custom = Factory.jsonToFactory( customOption ) ?: factory
+                factory = factory_custom
+                factory.saveWorldSettings(this.b.world.name)
+            }
 
             CustomizedWorldGenerator.instance.logger.info("""[${this.b.world.name}] loaded (show only first).
                 legacy[${customOption}]
                 --- readed options >>>
                 [${factory}]""".trimIndent())
-        } else {
-            CustomizedWorldGenerator.instance.logger.info("readed settings from customized.json")
         }
 
         val biomelayout1 = BiomeLayout.c

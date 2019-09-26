@@ -11,12 +11,18 @@ import java.util.function.BiFunction
 class WorldHandler_v1_14_R1 : WorldHandler, Listener {
     init {
         Bukkit.getPluginManager().registerEvents(this, CustomizedWorldGenerator.instance)
-        WorldProviderOverrider.Companion.Factory()    // making initialize customized.json
+        WorldProviderOverrider.Companion.Factory.init()    // making initialize customized.json
+        overrideOverworld()
+    }
 
-        // overrided DimensionManager.OVERWORLD
+    // overrided DimensionManager.OVERWORLD
+    fun overrideOverworld() {
         try {
             val bf = BiFunction<World, DimensionManager, WorldProvider> { world, dimensionmanager ->
                 WorldProviderOverrider(world, dimensionmanager)
+            }
+            if (DimensionManager.OVERWORLD.providerFactory == bf) {
+                return
             }
             val field = DimensionManager.OVERWORLD.javaClass.getDeclaredField("providerFactory")
             field.isAccessible = true

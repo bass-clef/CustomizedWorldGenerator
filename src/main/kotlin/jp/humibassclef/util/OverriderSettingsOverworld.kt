@@ -5,11 +5,10 @@ import net.minecraft.server.v1_14_R1.GeneratorSettingsOverworld
 
 
 class OverriderSettingsOverworld(settings: ChunkOverriderSettings) : GeneratorSettingsOverworld() {
-    var option: ChunkOverriderSettings
+    var option: ChunkOverriderSettings = settings
 
     init {
-        this.option = settings
-        this.s = if (settings.useLavaOceans) Blocks.LAVA.blockData else Blocks.WATER.blockData
+        this.s = if (option.useLavaOceans) Blocks.LAVA.blockData else Blocks.WATER.blockData
     }
 
     // 2層目の岩盤の高さ
