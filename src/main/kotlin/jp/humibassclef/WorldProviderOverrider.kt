@@ -6,10 +6,7 @@ import jp.humibassclef.util.ChunkOverriderSettings
 import jp.humibassclef.util.OverriderSettingsOverworld
 import net.minecraft.server.v1_14_R1.*
 import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.StringUtils.abbreviateMiddle
-import java.io.FileOutputStream
-import java.io.OutputStreamWriter
-import java.io.Reader
-import java.io.StringReader
+import java.io.*
 import java.lang.reflect.Type
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -114,9 +111,9 @@ class WorldProviderOverrider(world: World, dimensionmanager: DimensionManager) :
                         return Factory( DEFAULT_SETTINGS )
                     }
                 }
+                fun getWorldFileName(worldName: String): String = "${CustomizedWorldGenerator.instance.dataFolder.path}/../../$worldName/$SETTINGS_FILE"
+                fun getServerFileName(): String = "${CustomizedWorldGenerator.instance.dataFolder.path}/../../$SETTINGS_FILE"
 
-                private fun getWorldFileName(worldName: String): String = "${CustomizedWorldGenerator.instance.dataFolder.path}/../../$worldName/$SETTINGS_FILE"
-                private fun getServerFileName(): String = "${CustomizedWorldGenerator.instance.dataFolder.path}/../../$SETTINGS_FILE"
                 private fun setDefaults() {
                     val factory = Factory( DEFAULT_SETTINGS )
                     try {
@@ -225,10 +222,14 @@ class WorldProviderOverrider(world: World, dimensionmanager: DimensionManager) :
 
     override fun getChunkGenerator(): ChunkGenerator<*> {
         val worldType = this.b.getWorldData().type
-        if (worldType != WorldType.CUSTOMIZED) {
+        // ワールドを保存して閉じると WorldType.CUSTOMIZED が失われるっぽいので、customized.json があるかないかでも判断
+        if (worldType != WorldType.CUSTOMIZED && !existSettingsFile()) {
             return super.getChunkGenerator()
         }
+        return getChunkOverrider()
+    }
 
+    fun getChunkOverrider(): ChunkGenerator<*> {
         val opt = this.b.getWorldData().a( NBTTagCompound() )
         var factory = Factory(this.b.world.name)
         if (factory.isFromFile) {
@@ -252,4 +253,5 @@ class WorldProviderOverrider(world: World, dimensionmanager: DimensionManager) :
         val biomelayoutoverworldconfiguration = (biomelayout1.a() as BiomeLayoutOverworldConfiguration).a(this.b.worldData).a(overriderSettingsOverworld)
         return ChunkOverriderOverworld(this.b, biomelayout1.a(biomelayoutoverworldconfiguration), overriderSettingsOverworld)
     }
+    fun existSettingsFile() = File(Factory.getWorldFileName(this.b.world.name)).exists()
 }
