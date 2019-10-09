@@ -111,8 +111,8 @@ class WorldProviderOverrider(world: World, dimensionmanager: DimensionManager) :
                         return Factory( DEFAULT_SETTINGS )
                     }
                 }
-                fun getWorldFileName(worldName: String): String = "${CustomizedWorldGenerator.instance.dataFolder.path}/../../$worldName/$SETTINGS_FILE"
-                fun getServerFileName(): String = "${CustomizedWorldGenerator.instance.dataFolder.path}/../../$SETTINGS_FILE"
+                fun getWorldFileName(worldName: String): String = "./${CustomizedWorldGenerator.instance.dataFolder.parent}/../$worldName/$SETTINGS_FILE"
+                fun getServerFileName(): String = "./${CustomizedWorldGenerator.instance.dataFolder.parent}/../$SETTINGS_FILE"
 
                 private fun setDefaults() {
                     val factory = Factory( DEFAULT_SETTINGS )
