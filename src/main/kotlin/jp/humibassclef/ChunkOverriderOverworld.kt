@@ -320,8 +320,7 @@ class ChunkOverriderOverworld(generatoraccess: GeneratorAccess, worldchunkmanage
             var var6x = false
             when((worldGenFeatureConfigured.b as WorldGenFeatureCompositeConfiguration).a.a) {
                 is WorldGenMinable -> {
-                    if (_var6.get()) break@forLoop
-//                    var6x = worldGenFeatureConfigured.a(access, generator, _var5, it)
+//                    if (_var6.get()) break@forLoop    // fix:どうやら１回だとおかしくなるっぽい
                     val wgfoc = (worldGenFeatureConfigured.b as WorldGenFeatureCompositeConfiguration).a.b as WorldGenFeatureOreConfiguration
                     var6x = this.wgm_a(
                             access, generator, _var5, it,
